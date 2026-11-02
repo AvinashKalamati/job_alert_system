@@ -1,0 +1,25 @@
+# Python bytecode and test artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local secrets and Google Cloud credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/

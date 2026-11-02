@@ -1,0 +1,103 @@
+number,company,careers_url,board_platform,notes
+1,Amazon,https://www.amazon.jobs,Amazon Jobs,Implemented via Amazon's public job-search feed
+2,Microsoft,https://apply.careers.microsoft.com/careers,Eightfold,Implemented via Microsoft's current careers search service
+3,Google,https://www.google.com/about/careers/applications/jobs/results/,company-own,Implemented from Google's date-sorted job results
+4,TikTok / ByteDance,https://joinbytedance.com/,ByteDance,Implemented via the global ByteDance careers feed
+5,Tesla,https://www.tesla.com/careers,company-own,Implemented; Tesla may block requests from some cloud IP addresses
+6,Remitly,https://careers.remitly.com/,m-cloud,Implemented via Remitly's careers search service
+7,Smartsheet,https://www.smartsheet.com/careers,Greenhouse,Implemented via Greenhouse (job-boards.greenhouse.io/smartsheet)
+8,Snowflake,https://careers.snowflake.com/us/en,Ashby,Implemented via Snowflake's public Ashby job feed
+9,Zillow,https://zillow.wd5.myworkdayjobs.com/Zillow_Group_External,Workday,Implemented via Zillow's Workday board
+10,Highspot,https://www.seismic.com/careers/job-listings/,Seismic,Highspot careers now redirects to Seismic; implemented from the consolidated job list
+11,DigitalOcean,https://www.digitalocean.com/careers,company-own,
+12,Life360,https://www.life360.com/careers,company-own,Open roles hosted on Greenhouse (job-boards.greenhouse.io/life360)
+13,Hims & Hers,https://www.hims.com/careers-professionals,company-own,Corporate and professional roles; provider roles at hims.com/careers-providers
+14,SeatGeek,https://seatgeek.com/jobs,company-own,Applications via Greenhouse board (job-boards.greenhouse.io/seatgeek)
+15,IBM,https://www.ibm.com/careers,company-own,
+16,Intel,https://jobs.intel.com/en,company-own,
+17,Cisco,https://careers.cisco.com/,company-own,Applications route to Workday (cisco.wd5.myworkdayjobs.com)
+18,Qualcomm,https://careers.qualcomm.com/,company-own,
+19,Nvidia,https://jobs.nvidia.com/careers,company-own,Applications and account via Workday (nvidia.wd5.myworkdayjobs.com)
+20,Salesforce,https://www.salesforce.com/company/careers/,company-own,Job search and applications on Workday (salesforce.wd12.myworkdayjobs.com)
+21,Oracle,https://careers.oracle.com,company-own,
+22,PayPal,https://careers.pypl.com/,company-own,Job board powered by Eightfold (paypal.eightfold.ai/careers)
+23,Adobe,https://careers.adobe.com/us/en/,company-own,Applications via Workday (adobe.wd5.myworkdayjobs.com)
+24,ServiceNow,https://careers.servicenow.com/,company-own,
+25,Uber,https://www.uber.com/us/en/careers/list/,company-own,Postings also served on jobs.uber.com
+26,Meta,https://www.metacareers.com/,company-own,
+27,Apple,https://www.apple.com/careers/us/work-at-apple.html,company-own,Job search board: jobs.apple.com
+28,Palo Alto Networks,https://jobs.paloaltonetworks.com/EN/search-jobs,company-own,
+29,eBay,https://jobs.ebayinc.com/us/en/,company-own,Applications route to eBay's Workday board (ebay.wd5.myworkdayjobs.com)
+30,DoorDash,https://careersatdoordash.com/,company-own,Job search also at careers.doordash.com
+31,Expedia,https://careers.expediagroup.com/jobs/,company-own,Expedia Group careers; stated as official apply site in Expedia's own postings
+32,Dell,https://jobs.dell.com/,company-own,Dell Technologies careers portal
+33,Databricks,https://www.databricks.com/company/careers,company-own,Open positions list: databricks.com/company/careers/open-positions
+34,Workday,https://www.workday.com/en-us/company/careers.html,Workday,Postings hosted on Workday's own board (workday.wd5.myworkdayjobs.com); URL path pattern confirmed via workday.com locale careers pages in search results
+35,Stripe,https://stripe.com/careers,Greenhouse,Listings served via Greenhouse (job-boards.greenhouse.io); verified via stripe.com/gb/careers locale variant in search results
+36,Atlassian,https://www.atlassian.com/company/careers/all-jobs,company-own,
+37,Airbnb,https://careers.airbnb.com/positions/,company-own,
+38,OpenAI,https://openai.com/careers,company-own,Job search board: openai.com/careers/search (verified in search results)
+39,Anthropic,https://www.anthropic.com/careers/jobs,Greenhouse,Applications via job-boards.greenhouse.io/anthropic
+40,Block,https://block.xyz/careers/jobs,Greenhouse,Block Inc. (Square; Cash App; Afterpay; TIDAL)
+41,Coinbase,https://www.coinbase.com/careers,Greenhouse,Postings carry Greenhouse IDs (gh_jid) per search results
+42,Robinhood,https://careers.robinhood.com,Greenhouse,Listings come from Robinhood's Greenhouse board per search results
+43,LinkedIn,https://careers.linkedin.com/,company-own,
+44,AMD,https://careers.amd.com,company-own,Job postings under careers.amd.com/careers-home/jobs
+45,Comcast / NBCUniversal,https://jobs.comcast.com,Workday,Comcast job search portal; job alerts/sign-in via Workday per site text
+46,Intuit,https://jobs.intuit.com,Avature,Board search facets tag listings as Avature
+47,Micron,https://careers.micron.com/careers,Eightfold,Board also at micron.eightfold.ai; candidate login via Workday (micron.wd1.myworkdayjobs.com)
+48,Hewlett Packard Enterprise,https://careers.hpe.com/us/en,company-own,
+49,Applied Materials,https://careers.appliedmaterials.com,company-own,Job board at careers.appliedmaterials.com/careers
+50,T-Mobile,https://careers.t-mobile.com,company-own,
+51,Snap,https://careers.snap.com/jobs,company-own,Snap Inc. jobs list
+52,SAP America,https://jobs.sap.com/en/job-areas/,company-own,SAP jobs portal is jobs.sap.com
+53,Juniper Networks,https://www.juniper.net/us/en/company/careers/,company-own,Job board runs at careers.juniper.net
+54,Pinterest,https://www.pinterestcareers.com/jobs/,company-own,Verified live job listings page on official Pinterest Careers site
+55,KLA,https://www.kla.com/careers,company-own,
+56,Netflix,https://jobs.netflix.com,Eightfold,Job board runs at explore.jobs.netflix.net
+57,Cadence Design Systems,https://www.cadence.com/en_US/home/company/life-at-cadence/careers.html,Workday,Applications via cadence.wd1.myworkdayjobs.com
+58,Synopsys,https://careers.synopsys.com/search-jobs,TalentBrew,
+59,Nutanix,https://careers.nutanix.com/en/jobs/,company-own,Stated as official Careers site in Nutanix job-seeker alert
+60,Roblox,https://careers.roblox.com/jobs,Greenhouse,
+61,Marvell,https://www.marvell.com/company/careers.html,company-own,Careers path confirmed on marvell.com (site's own careers page and job listings link here)
+62,Autodesk,https://www.autodesk.com/careers/overview,Eightfold,Job board at jobs.autodesk.com
+63,Lam Research,https://www.lamresearch.com/careers,Eightfold,Job board at careers.lamresearch.com
+64,Akamai,https://www.akamai.com/careers,Oracle Recruiting,Job board at jobs.akamai.com
+65,NXP Semiconductors,https://www.nxp.com/careers,company-own,
+66,Arista Networks,https://www.arista.com/en/careers,company-own,
+67,Fortinet,https://www.fortinet.com/uk/corporate/careers,company-own,UK-locale version of Fortinet corporate careers page; verified loading
+68,HP Inc.,https://jobs.hp.com/en-us/,Eightfold,Job board at apply.hp.com
+69,Motorola Solutions,https://motorolasolutions.wd5.myworkdayjobs.com/Careers,Workday,
+70,NetApp,https://careers.netapp.com/search-jobs,TalentBrew,Board uses Eightfold matching
+71,VMware,https://careers.vmware.com/,company-own,VMware is now part of Broadcom; site routes to Broadcom hiring
+72,Pure Storage,https://www.everpuredata.com/company/careers.html,Greenhouse,"Company rebranded from Pure Storage to Everpure in Feb 2026; careers site now on everpuredata.com, applications via Greenhouse (purestorage board)"
+73,Instacart,https://www.instacart.careers/current-openings,Greenhouse,Instacart files as Maplebear Inc.
+74,Twilio,https://www.twilio.com/en-us/careers,Eightfold,Job board at jobs.twilio.com
+75,Zscaler,https://www.zscaler.com/careers,Greenhouse,
+76,MongoDB,https://www.mongodb.com/company/careers,Greenhouse,
+77,Texas Instruments,https://careers.ti.com/,Oracle Recruiting,
+78,Spotify USA,https://www.spotify.com/jobs/,Lever,Careers landing (Life at Spotify) on spotify.com; applications run on Lever (jobs.lever.co/spotify)
+79,Samsung Electronics America,https://www.samsung.com/us/careers/,company-own,Samsung Electronics America careers hub on the Samsung US site; global careers site is careers.samsung.com
+80,F5,https://www.f5.com/company/careers,Workday,Job search runs on the Workday board ffive.wd5.myworkdayjobs.com (f5jobs)
+81,HubSpot,https://www.hubspot.com/careers/jobs/all,company-own,All-openings page on the HubSpot careers site
+82,Rubrik,https://www.rubrik.com/company/careers,company-own,Careers hub; department job listings hosted on rubrik.com
+83,Sony Interactive Entertainment,https://careers.playstation.com/jobs,Greenhouse,PlayStation careers site (SIE job search)
+84,Confluent,https://careers.confluent.io/open-positions,Ashby,Confluent careers site linked from confluent.io; job board runs on Ashby
+85,Lyft,https://www.lyft.com/careers,company-own,
+86,Electronic Arts,https://jobs.ea.com/careers,company-own,EA job search portal
+87,Dropbox,https://www.dropbox.jobs,Greenhouse,Dropbox Careers site; listings carry Greenhouse source links and jobs.dropbox.com redirects here
+88,GoDaddy,https://careers.godaddy/,company-own,
+89,Cloudflare,https://www.cloudflare.com/careers/jobs/,company-own,Open-positions page on the Cloudflare careers site
+90,CrowdStrike,https://www.crowdstrike.com/careers/,Workday,Job search runs on the Workday board crowdstrike.wd5.myworkdayjobs.com (crowdstrikecareers)
+91,Okta,https://www.okta.com/company/careers/,company-own,
+92,Zoom,https://careers.zoom.us/home,company-own,Zoom careers site as cited on Zoom's LinkedIn and Built In pages
+93,Reddit,https://redditinc.com/careers,Greenhouse,Applications run on the Greenhouse board job-boards.greenhouse.io/reddit
+94,Broadcom,https://www.broadcom.com/company/careers/teams,Workday,Careers section on broadcom.com; job search runs on Workday (broadcom.wd1.myworkdayjobs.com/External_Career)
+95,Western Digital,https://www.westerndigital.com/careers,SmartRecruiters,Job listings run on SmartRecruiters (careers.smartrecruiters.com/WesternDigital)
+96,Samsara,https://www.samsara.com/company/careers,Greenhouse,Roles hosted on samsara.com with Greenhouse job IDs (gh_jid)
+97,Shopify,https://www.shopify.com/careers,company-own,Shopify main careers page
+98,Disney,https://www.disneycareers.com,TalentBrew,Disney Careers job search (TalentBrew-powered)
+99,Unity,https://careers.unity.com,company-own,Careers site as cited on Unity's LinkedIn page
+100,Duolingo,https://careers.duolingo.com,Greenhouse,Job postings carry Greenhouse job IDs (gh_jid)
+101,Cohesity,https://www.cohesity.com/careers/,Greenhouse,Careers section on cohesity.com (verified via its careers subpages); job links carry Greenhouse gh_jid
+102,Affirm,https://www.affirm.com/careers,Greenhouse,Jobs board at job-boards.greenhouse.io/affirm

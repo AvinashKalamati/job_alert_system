@@ -1,0 +1,66 @@
+{
+  "greenhouse": [
+    "smartsheet"
+  ],
+  "lever": [],
+  "amazon": [
+    {
+      "company": "Amazon",
+      "max_pages": 5
+    }
+  ],
+  "eightfold": [
+    {
+      "company": "Microsoft",
+      "host": "https://apply.careers.microsoft.com",
+      "domain": "microsoft.com",
+      "max_pages": 20
+    }
+  ],
+  "google_careers": [
+    {
+      "company": "Google",
+      "max_pages": 10
+    }
+  ],
+  "bytedance": [
+    {
+      "company": "TikTok / ByteDance",
+      "max_pages": 20
+    }
+  ],
+  "tesla": [
+    {
+      "company": "Tesla"
+    }
+  ],
+  "mcloud": [
+    {
+      "company": "Remitly",
+      "company_name": "companies/c9a5233b-7164-44d2-98df-974dcaa42789",
+      "filter": "is_internal=\"Remitly_Careers\"",
+      "max_pages": 5
+    }
+  ],
+  "ashby": [
+    {
+      "company": "Snowflake",
+      "token": "snowflake"
+    }
+  ],
+  "workday": [
+    {
+      "company": "Zillow",
+      "host": "https://zillow.wd5.myworkdayjobs.com",
+      "tenant": "zillow",
+      "site": "Zillow_Group_External",
+      "max_pages": 10
+    }
+  ],
+  "seismic": [
+    {
+      "company": "Highspot / Seismic",
+      "url": "https://www.seismic.com/careers/job-listings/"
+    }
+  ]
+}
