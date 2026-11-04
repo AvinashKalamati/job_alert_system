@@ -5,9 +5,10 @@ import fetchers
 
 
 class FakeResponse:
-    def __init__(self, json_data=None, text=""):
+    def __init__(self, json_data=None, text="", headers=None):
         self._json_data = json_data
         self.text = text
+        self.headers = headers or {}
 
     def raise_for_status(self):
         return None
@@ -59,6 +60,78 @@ class FetcherTests(unittest.TestCase):
         jobs = fetchers.fetch_google_jobs({"company": "Google", "max_pages": 1})
         self.assertEqual(jobs[0]["id"], "google_google_123")
         self.assertIn("/jobs/results/123-software-engineer", jobs[0]["url"])
+
+    @patch("fetchers.requests.post")
+    def test_ibm(self, post):
+        post.return_value = FakeResponse({"hits": {"total": {"value": 1}, "hits": [{
+            "_id": "document-id",
+            "_source": {
+                "title": "Entry Level Software Developer",
+                "url": "https://www.ibm.com/careers/search?jobId=12345",
+                "field_keyword_19": "Austin, TX",
+            },
+        }]}})
+        jobs = fetchers.fetch_ibm_jobs({"company": "IBM", "max_pages": 1})
+        self.assertEqual(jobs[0]["id"], "ibm_ibm_12345")
+        self.assertEqual(jobs[0]["location"], "Austin, TX")
+
+    @patch("fetchers.requests.get")
+    def test_smartrecruiters(self, get):
+        get.return_value = FakeResponse({
+            "totalFound": 1,
+            "content": [{
+                "id": "123",
+                "name": "Software Engineer",
+                "location": {"city": "Santa Clara", "country": "US"},
+            }],
+        })
+        jobs = fetchers.fetch_smartrecruiters_jobs({
+            "company": "ServiceNow", "identifier": "ServiceNow", "max_pages": 1,
+        })
+        self.assertEqual(jobs[0]["id"], "smartrecruiters_servicenow_123")
+        self.assertEqual(jobs[0]["location"], "Santa Clara, US")
+
+    @patch("fetchers.requests.get")
+    def test_oracle_recruiting(self, get):
+        get.return_value = FakeResponse({"items": [{
+            "TotalJobsCount": 1,
+            "requisitionList": [{
+                "Id": "456",
+                "Title": "Software Developer I",
+                "PrimaryLocation": "Austin, TX",
+            }],
+        }]})
+        jobs = fetchers.fetch_oracle_recruiting_jobs({
+            "company": "Oracle",
+            "host": "https://example.oraclecloud.com",
+            "site": "CX_1",
+            "max_pages": 1,
+        })
+        self.assertEqual(jobs[0]["id"], "oracle_recruiting_oracle_456")
+        self.assertIn("/sites/CX_1/job/456", jobs[0]["url"])
+
+    @patch("fetchers.requests.Session")
+    def test_apple(self, session_factory):
+        session = session_factory.return_value.__enter__.return_value
+        session.get.return_value = FakeResponse(headers={
+            "x-apple-csrf-token": "csrf-token",
+        })
+        session.post.return_value = FakeResponse({"res": {
+            "totalRecords": 1,
+            "searchResults": [{
+                "positionId": "200123456-0001",
+                "postingTitle": "Software Engineer",
+                "transformedPostingTitle": "software-engineer",
+                "locations": [{"name": "Cupertino, CA"}],
+            }],
+        }})
+        jobs = fetchers.fetch_apple_jobs({"company": "Apple", "max_pages": 1})
+        self.assertEqual(jobs[0]["id"], "apple_apple_200123456-0001")
+        self.assertEqual(jobs[0]["location"], "Cupertino, CA")
+        self.assertEqual(
+            session.post.call_args.kwargs["headers"]["X-Apple-CSRF-Token"],
+            "csrf-token",
+        )
 
     @patch("fetchers.requests.post")
     def test_bytedance(self, post):

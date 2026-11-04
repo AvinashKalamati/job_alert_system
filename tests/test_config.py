@@ -4,12 +4,14 @@ import unittest
 
 
 class ConfigTests(unittest.TestCase):
-    def test_config_contains_exactly_the_first_ten_csv_companies(self):
+    def test_config_contains_the_first_twenty_and_verified_next_companies(self):
         with open("h1b-102-companies-careers-pages.csv", newline="") as file:
-            expected = {
-                row["company"]
-                for row in list(csv.DictReader(file))[:10]
-            }
+            rows = list(csv.DictReader(file))
+            expected = {row["company"] for row in rows[:20]}
+            expected.update(
+                rows[index]["company"]
+                for index in (20, 21, 22, 23, 24, 26, 27, 28, 29)
+            )
 
         with open("config/companies.json") as file:
             config = json.load(file)
@@ -20,8 +22,16 @@ class ConfigTests(unittest.TestCase):
             if source not in ("greenhouse", "lever")
             for item in items
         }
+        greenhouse_companies = {
+            "smartsheet": "Smartsheet",
+            "digitalocean98": "DigitalOcean",
+            "life360": "Life360",
+            "seatgeek": "SeatGeek",
+            "doordashusa": "DoorDash",
+        }
         configured.update(
-            token.title() for token in config.get("greenhouse", [])
+            greenhouse_companies[token]
+            for token in config.get("greenhouse", [])
         )
         configured.update(token.title() for token in config.get("lever", []))
 

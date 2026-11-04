@@ -16,11 +16,12 @@ texts you when a new match is found.
 5. `sms.py` sends one concise Twilio SMS with the first match and total count.
 6. `main.py` ties it all together as a Cloud Function entry point.
 
-## First 10 CSV companies
+## Configured CSV companies
 
-The first 10 rows of `h1b-102-companies-careers-pages.csv` are configured:
-Amazon, Microsoft, Google, TikTok/ByteDance, Tesla, Remitly, Smartsheet,
-Snowflake, Zillow, and Highspot (whose careers page now redirects to Seismic).
+The first 20 rows of `h1b-102-companies-careers-pages.csv` are configured,
+plus Oracle, PayPal, Adobe, ServiceNow, Uber, Apple, Palo Alto Networks, eBay,
+and DoorDash.
+Highspot's careers page redirects to Seismic.
 
 Large boards are scanned newest-first with page limits set in
 `config/companies.json`. This makes a 30-minute alert run practical while still

@@ -18,6 +18,15 @@ TESLA_URL = "https://www.tesla.com/cua-api/apps/careers/state"
 MCLOUD_URL = "https://jobsapi-google.m-cloud.io/api/job/search"
 ASHBY_URL = "https://api.ashbyhq.com/posting-api/job-board/{token}"
 WORKDAY_URL = "{host}/wday/cxs/{tenant}/{site}/jobs"
+IBM_URL = "https://www-api.ibm.com/search/api/v2"
+SMARTRECRUITERS_URL = (
+    "https://api.smartrecruiters.com/v1/companies/{identifier}/postings"
+)
+ORACLE_RECRUITING_URL = (
+    "{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+)
+APPLE_CSRF_URL = "https://jobs.apple.com/api/v1/CSRFToken"
+APPLE_SEARCH_URL = "https://jobs.apple.com/api/v1/search"
 
 REQUEST_TIMEOUT = 20
 BROWSER_HEADERS = {
@@ -270,6 +279,210 @@ def fetch_google_jobs(options: dict) -> list[dict]:
                 break
     except (requests.RequestException, ValueError, AttributeError) as error:
         return _failed("google", company, error)
+    return normalized
+
+
+def fetch_ibm_jobs(options: dict) -> list[dict]:
+    """Fetch IBM's public careers search, which is backed by Elasticsearch."""
+    company = options.get("company", "IBM")
+    page_size = 100
+    normalized = []
+    try:
+        for page in range(int(options.get("max_pages", 5))):
+            response = requests.post(
+                IBM_URL,
+                json={
+                    "appId": "careers",
+                    "scopes": ["careers2"],
+                    "sm": {"query": "", "lang": "zz"},
+                    "size": page_size,
+                    "from": page * page_size,
+                },
+                headers={**BROWSER_HEADERS, "Content-Type": "application/json"},
+                timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            body = response.json()
+            hits = (body.get("hits") or {}).get("hits", [])
+            for hit in hits:
+                job = hit.get("_source") or {}
+                url = job.get("url", "")
+                raw_id = parse_qs(urlparse(url).query).get("jobId", [None])[0]
+                normalized.append(
+                    _job(
+                        "ibm",
+                        company,
+                        raw_id or hit.get("_id"),
+                        job.get("title"),
+                        url,
+                        _location(job.get("field_keyword_19")),
+                    )
+                )
+            total = (body.get("hits") or {}).get("total", {})
+            total = total.get("value") if isinstance(total, dict) else total
+            if len(hits) < page_size or (
+                total is not None and len(normalized) >= int(total)
+            ):
+                break
+    except (requests.RequestException, ValueError, AttributeError, TypeError) as error:
+        return _failed("ibm", company, error)
+    return normalized
+
+
+def fetch_smartrecruiters_jobs(options: dict) -> list[dict]:
+    """Fetch a public SmartRecruiters board."""
+    company = options["company"]
+    identifier = options["identifier"]
+    page_size = 100
+    normalized = []
+    try:
+        for page in range(int(options.get("max_pages", 10))):
+            response = requests.get(
+                SMARTRECRUITERS_URL.format(identifier=identifier),
+                params={"limit": page_size, "offset": page * page_size},
+                headers=BROWSER_HEADERS,
+                timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            body = response.json()
+            postings = body.get("content", [])
+            for posting in postings:
+                raw_id = posting.get("id") or posting.get("uuid")
+                normalized.append(
+                    _job(
+                        "smartrecruiters",
+                        company,
+                        raw_id,
+                        posting.get("name"),
+                        posting.get("postingUrl")
+                        or f"https://jobs.smartrecruiters.com/{identifier}/{raw_id}",
+                        _location(posting.get("location")),
+                    )
+                )
+            total = body.get("totalFound")
+            if len(postings) < page_size or (
+                total is not None and len(normalized) >= int(total)
+            ):
+                break
+    except (requests.RequestException, ValueError, AttributeError, TypeError) as error:
+        return _failed("smartrecruiters", company, error)
+    return normalized
+
+
+def fetch_oracle_recruiting_jobs(options: dict) -> list[dict]:
+    """Fetch a public Oracle Recruiting Cloud candidate-experience board."""
+    company = options["company"]
+    host = options["host"].rstrip("/")
+    site = options["site"]
+    page_size = 100
+    normalized = []
+    try:
+        for page in range(int(options.get("max_pages", 10))):
+            finder = (
+                f"findReqs;siteNumber={site},limit={page_size},"
+                f"offset={page * page_size},sortBy=POSTING_DATES_DESC"
+            )
+            response = requests.get(
+                ORACLE_RECRUITING_URL.format(host=host),
+                params={
+                    "onlyData": "true",
+                    "expand": "requisitionList",
+                    "finder": finder,
+                },
+                headers=BROWSER_HEADERS,
+                timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            body = response.json()
+            result = (body.get("items") or [{}])[0]
+            postings = result.get("requisitionList") or []
+            for posting in postings:
+                raw_id = posting.get("Id")
+                normalized.append(
+                    _job(
+                        "oracle_recruiting",
+                        company,
+                        raw_id,
+                        posting.get("Title"),
+                        f"{host}/hcmUI/CandidateExperience/en/sites/{site}/job/{raw_id}",
+                        posting.get("PrimaryLocation"),
+                    )
+                )
+            total = result.get("TotalJobsCount")
+            if len(postings) < page_size or (
+                total is not None and len(normalized) >= int(total)
+            ):
+                break
+    except (requests.RequestException, ValueError, AttributeError, TypeError) as error:
+        return _failed("oracle_recruiting", company, error)
+    return normalized
+
+
+def fetch_apple_jobs(options: dict) -> list[dict]:
+    """Fetch Apple's public careers search API using its browser session flow."""
+    company = options.get("company", "Apple")
+    page_size = 20
+    normalized = []
+    try:
+        with requests.Session() as session:
+            token_response = session.get(
+                APPLE_CSRF_URL, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT
+            )
+            token_response.raise_for_status()
+            csrf_token = token_response.headers.get("x-apple-csrf-token")
+            headers = dict(BROWSER_HEADERS)
+            if csrf_token:
+                headers["X-Apple-CSRF-Token"] = csrf_token
+
+            for page in range(1, int(options.get("max_pages", 10)) + 1):
+                response = session.post(
+                    APPLE_SEARCH_URL,
+                    json={
+                        "query": "",
+                        "filters": {},
+                        "page": page,
+                        "locale": "en-us",
+                        "sort": "",
+                        "format": {
+                            "longDate": "MMMM D, YYYY",
+                            "mediumDate": "MMM D, YYYY",
+                        },
+                    },
+                    headers=headers,
+                    timeout=REQUEST_TIMEOUT,
+                )
+                response.raise_for_status()
+                body = response.json()
+                result = body.get("res") or body
+                postings = (
+                    result.get("searchResults")
+                    or result.get("searchResultItems")
+                    or result.get("jobs")
+                    or []
+                )
+                for posting in postings:
+                    raw_id = posting.get("positionId") or posting.get("reqId")
+                    title = posting.get("postingTitle", "")
+                    slug = posting.get("transformedPostingTitle") or re.sub(
+                        r"[^a-z0-9]+", "-", title.lower()
+                    ).strip("-")
+                    normalized.append(
+                        _job(
+                            "apple",
+                            company,
+                            raw_id,
+                            title,
+                            f"https://jobs.apple.com/en-us/details/{raw_id}/{slug}",
+                            _location(posting.get("locations")),
+                        )
+                    )
+                total = result.get("totalRecords")
+                if len(postings) < page_size or (
+                    total is not None and len(normalized) >= int(total)
+                ):
+                    break
+    except (requests.RequestException, ValueError, AttributeError, TypeError) as error:
+        return _failed("apple", company, error)
     return normalized
 
 
@@ -604,6 +817,10 @@ CONFIGURED_FETCHERS = {
     "amazon": fetch_amazon_jobs,
     "eightfold": fetch_eightfold_jobs,
     "google_careers": fetch_google_jobs,
+    "ibm": fetch_ibm_jobs,
+    "smartrecruiters": fetch_smartrecruiters_jobs,
+    "oracle_recruiting": fetch_oracle_recruiting_jobs,
+    "apple": fetch_apple_jobs,
     "bytedance": fetch_bytedance_jobs,
     "tesla": fetch_tesla_jobs,
     "mcloud": fetch_mcloud_jobs,

@@ -1,6 +1,10 @@
 {
   "greenhouse": [
-    "smartsheet"
+    "smartsheet",
+    "digitalocean98",
+    "life360",
+    "seatgeek",
+    "doordashusa"
   ],
   "lever": [],
   "amazon": [
@@ -14,6 +18,18 @@
       "company": "Microsoft",
       "host": "https://apply.careers.microsoft.com",
       "domain": "microsoft.com",
+      "max_pages": 20
+    },
+    {
+      "company": "Qualcomm",
+      "host": "https://qualcomm.eightfold.ai",
+      "domain": "qualcomm.com",
+      "max_pages": 20
+    },
+    {
+      "company": "PayPal",
+      "host": "https://paypal.eightfold.ai",
+      "domain": "paypal.com",
       "max_pages": 20
     }
   ],
@@ -46,6 +62,10 @@
     {
       "company": "Snowflake",
       "token": "snowflake"
+    },
+    {
+      "company": "Hims & Hers",
+      "token": "hims-and-hers"
     }
   ],
   "workday": [
@@ -54,6 +74,88 @@
       "host": "https://zillow.wd5.myworkdayjobs.com",
       "tenant": "zillow",
       "site": "Zillow_Group_External",
+      "max_pages": 10
+    },
+    {
+      "company": "Cisco",
+      "host": "https://cisco.wd5.myworkdayjobs.com",
+      "tenant": "cisco",
+      "site": "Cisco_Careers",
+      "max_pages": 10
+    },
+    {
+      "company": "Nvidia",
+      "host": "https://nvidia.wd5.myworkdayjobs.com",
+      "tenant": "nvidia",
+      "site": "NVIDIAExternalCareerSite",
+      "max_pages": 10
+    },
+    {
+      "company": "Intel",
+      "host": "https://intel.wd1.myworkdayjobs.com",
+      "tenant": "intel",
+      "site": "External",
+      "max_pages": 10
+    },
+    {
+      "company": "Salesforce",
+      "host": "https://salesforce.wd12.myworkdayjobs.com",
+      "tenant": "salesforce",
+      "site": "External_Career_Site",
+      "max_pages": 10
+    },
+    {
+      "company": "Adobe",
+      "host": "https://adobe.wd5.myworkdayjobs.com",
+      "tenant": "adobe",
+      "site": "external_experienced",
+      "max_pages": 10
+    },
+    {
+      "company": "Palo Alto Networks",
+      "host": "https://paloaltonetworks.wd5.myworkdayjobs.com",
+      "tenant": "paloaltonetworks",
+      "site": "panwexternalcareers",
+      "max_pages": 10
+    },
+    {
+      "company": "eBay",
+      "host": "https://ebay.wd5.myworkdayjobs.com",
+      "tenant": "ebay",
+      "site": "apply",
+      "max_pages": 10
+    }
+  ],
+  "ibm": [
+    {
+      "company": "IBM",
+      "max_pages": 5
+    }
+  ],
+  "smartrecruiters": [
+    {
+      "company": "ServiceNow",
+      "identifier": "ServiceNow",
+      "max_pages": 10
+    }
+  ],
+  "oracle_recruiting": [
+    {
+      "company": "Oracle",
+      "host": "https://eeho.fa.us2.oraclecloud.com",
+      "site": "CX_45001",
+      "max_pages": 10
+    },
+    {
+      "company": "Uber",
+      "host": "https://iaziqy.fa.ocs.oraclecloud.com",
+      "site": "UberCareers",
+      "max_pages": 10
+    }
+  ],
+  "apple": [
+    {
+      "company": "Apple",
       "max_pages": 10
     }
   ],
