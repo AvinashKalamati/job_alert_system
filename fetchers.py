@@ -2,10 +2,17 @@
 
 from concurrent.futures import ThreadPoolExecutor
 import re
+import threading
 from urllib.parse import parse_qs, urljoin, urlparse
 
 from bs4 import BeautifulSoup
 import requests
+
+from proxy_support import (
+    configure_session,
+    get_configured_positive_int,
+    get_proxy_mapping,
+)
 
 
 GREENHOUSE_URL = "https://boards-api.greenhouse.io/v1/boards/{token}/jobs"
@@ -36,6 +43,38 @@ BROWSER_HEADERS = {
     ),
     "Accept": "application/json,text/html;q=0.9,*/*;q=0.8",
 }
+
+_DOMAIN_LIMITERS = {}
+_DOMAIN_LIMITERS_LOCK = threading.Lock()
+
+
+def _domain_limiter(url: str) -> threading.BoundedSemaphore:
+    """Return the configured semaphore for one outbound hostname."""
+    host = urlparse(url).netloc
+    limit = get_configured_positive_int("JOB_ALERT_PER_DOMAIN_CONCURRENCY", 2)
+    key = (host, limit)
+    with _DOMAIN_LIMITERS_LOCK:
+        if key not in _DOMAIN_LIMITERS:
+            _DOMAIN_LIMITERS[key] = threading.BoundedSemaphore(limit)
+        return _DOMAIN_LIMITERS[key]
+
+
+def _request_options(kwargs: dict) -> dict:
+    options = dict(kwargs)
+    proxies = get_proxy_mapping()
+    if proxies and "proxies" not in options:
+        options["proxies"] = proxies
+    return options
+
+
+def _get(url: str, **kwargs):
+    with _domain_limiter(url):
+        return requests.get(url, **_request_options(kwargs))
+
+
+def _post(url: str, **kwargs):
+    with _domain_limiter(url):
+        return requests.post(url, **_request_options(kwargs))
 
 
 def _company_key(company: str) -> str:
@@ -83,7 +122,7 @@ def _failed(source: str, company: str, error: Exception) -> list[dict]:
 def fetch_greenhouse_jobs(company_token: str) -> list[dict]:
     """Fetch one Greenhouse board while preserving existing dedupe IDs."""
     try:
-        response = requests.get(
+        response = _get(
             GREENHOUSE_URL.format(token=company_token), timeout=REQUEST_TIMEOUT
         )
         response.raise_for_status()
@@ -107,7 +146,7 @@ def fetch_greenhouse_jobs(company_token: str) -> list[dict]:
 def fetch_lever_jobs(company_token: str) -> list[dict]:
     """Fetch one Lever board while preserving existing dedupe IDs."""
     try:
-        response = requests.get(
+        response = _get(
             LEVER_URL.format(token=company_token), timeout=REQUEST_TIMEOUT
         )
         response.raise_for_status()
@@ -136,7 +175,7 @@ def fetch_amazon_jobs(options: dict) -> list[dict]:
     normalized = []
     try:
         for page in range(int(options.get("max_pages", 5))):
-            response = requests.get(
+            response = _get(
                 AMAZON_URL,
                 params={
                     "offset": page * page_size,
@@ -179,7 +218,7 @@ def fetch_eightfold_jobs(options: dict) -> list[dict]:
     normalized = []
     try:
         for page in range(int(options.get("max_pages", 20))):
-            response = requests.get(
+            response = _get(
                 EIGHTFOLD_URL.format(host=host),
                 params={
                     "domain": options.get("domain", ""),
@@ -239,7 +278,7 @@ def fetch_google_jobs(options: dict) -> list[dict]:
     seen_ids = set()
     try:
         for page in range(1, int(options.get("max_pages", 10)) + 1):
-            response = requests.get(
+            response = _get(
                 GOOGLE_URL,
                 params={"hl": "en_US", "sort_by": "date", "page": page},
                 headers=BROWSER_HEADERS,
@@ -289,7 +328,7 @@ def fetch_ibm_jobs(options: dict) -> list[dict]:
     normalized = []
     try:
         for page in range(int(options.get("max_pages", 5))):
-            response = requests.post(
+            response = _post(
                 IBM_URL,
                 json={
                     "appId": "careers",
@@ -337,7 +376,7 @@ def fetch_smartrecruiters_jobs(options: dict) -> list[dict]:
     normalized = []
     try:
         for page in range(int(options.get("max_pages", 10))):
-            response = requests.get(
+            response = _get(
                 SMARTRECRUITERS_URL.format(identifier=identifier),
                 params={"limit": page_size, "offset": page * page_size},
                 headers=BROWSER_HEADERS,
@@ -382,7 +421,7 @@ def fetch_oracle_recruiting_jobs(options: dict) -> list[dict]:
                 f"findReqs;siteNumber={site},limit={page_size},"
                 f"offset={page * page_size},sortBy=POSTING_DATES_DESC"
             )
-            response = requests.get(
+            response = _get(
                 ORACLE_RECRUITING_URL.format(host=host),
                 params={
                     "onlyData": "true",
@@ -425,6 +464,7 @@ def fetch_apple_jobs(options: dict) -> list[dict]:
     normalized = []
     try:
         with requests.Session() as session:
+            configure_session(session)
             token_response = session.get(
                 APPLE_CSRF_URL, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT
             )
@@ -511,7 +551,7 @@ def fetch_bytedance_jobs(options: dict) -> list[dict]:
                 "limit": page_size,
                 "offset": page * page_size,
             }
-            response = requests.post(
+            response = _post(
                 BYTEDANCE_URL,
                 json=payload,
                 headers=headers,
@@ -572,7 +612,7 @@ def _tesla_location(lookup: dict, value) -> str:
 def fetch_tesla_jobs(options: dict) -> list[dict]:
     company = options.get("company", "Tesla")
     try:
-        response = requests.get(
+        response = _get(
             TESLA_URL, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT
         )
         response.raise_for_status()
@@ -624,7 +664,7 @@ def fetch_mcloud_jobs(options: dict) -> list[dict]:
     normalized = []
     try:
         for page in range(int(options.get("max_pages", 5))):
-            response = requests.get(
+            response = _get(
                 MCLOUD_URL,
                 params={
                     "pageSize": page_size,
@@ -677,7 +717,7 @@ def fetch_mcloud_jobs(options: dict) -> list[dict]:
 def fetch_ashby_jobs(options: dict) -> list[dict]:
     company = options["company"]
     try:
-        response = requests.get(
+        response = _get(
             ASHBY_URL.format(token=options["token"]),
             headers=BROWSER_HEADERS,
             timeout=REQUEST_TIMEOUT,
@@ -713,7 +753,7 @@ def fetch_workday_jobs(options: dict) -> list[dict]:
     normalized = []
     try:
         for page in range(int(options.get("max_pages", 10))):
-            response = requests.post(
+            response = _post(
                 WORKDAY_URL.format(
                     host=host,
                     tenant=tenant,
@@ -777,7 +817,7 @@ def fetch_seismic_jobs(options: dict) -> list[dict]:
         "url", "https://www.seismic.com/careers/job-listings/"
     )
     try:
-        response = requests.get(
+        response = _get(
             board_url, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT
         )
         response.raise_for_status()
@@ -843,7 +883,8 @@ def fetch_all_jobs(companies_config: dict) -> list[dict]:
         return []
 
     all_jobs = []
-    with ThreadPoolExecutor(max_workers=min(10, len(tasks))) as executor:
+    max_workers = get_configured_positive_int("JOB_ALERT_MAX_WORKERS", 10)
+    with ThreadPoolExecutor(max_workers=min(max_workers, len(tasks))) as executor:
         futures = [
             executor.submit(fetcher, argument)
             for fetcher, argument in tasks

@@ -18,19 +18,19 @@
       "company": "Microsoft",
       "host": "https://apply.careers.microsoft.com",
       "domain": "microsoft.com",
-      "max_pages": 20
+      "max_pages": 3
     },
     {
       "company": "Qualcomm",
       "host": "https://qualcomm.eightfold.ai",
       "domain": "qualcomm.com",
-      "max_pages": 20
+      "max_pages": 3
     },
     {
       "company": "PayPal",
       "host": "https://paypal.eightfold.ai",
       "domain": "paypal.com",
-      "max_pages": 20
+      "max_pages": 3
     }
   ],
   "google_careers": [

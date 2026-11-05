@@ -144,6 +144,38 @@ Run the fetcher unit tests without sending email or touching Firestore:
 python -m unittest discover -s tests -v
 ```
 
+## Optional outbound proxy
+
+The fetchers work normally without a proxy. To route their traffic through one
+HTTP/HTTPS forward proxy, put one of these settings in the protected systemd
+environment file (`/etc/job-alert-system.env` in the server setup):
+
+```ini
+JOB_ALERT_PROXY_URL=http://USERNAME:PASSWORD@HOST:PORT
+```
+
+Alternatively, place `{"proxy_url": "..."}` in a mode-600 JSON file readable
+only by the systemd service user and set `JOB_ALERT_PROXY_FILE` to its path.
+Do not commit either secret.
+Test the configured proxy without contacting any careers site:
+
+```bash
+python proxy.py
+```
+
+Outbound concurrency defaults to 10 total fetcher workers and 2 requests per
+domain. Override them only when your network and the source's published limits
+permit it:
+
+```ini
+JOB_ALERT_MAX_WORKERS=10
+JOB_ALERT_PER_DOMAIN_CONCURRENCY=2
+```
+
+The application does not rotate proxies in response to rate limits or access
+blocks. To roll back proxy use, remove the proxy setting and restart the next
+systemd run; no code or Firestore changes are needed.
+
 ## Adding Phase 2 companies later
 
 Greenhouse and Lever companies only need a token added to
