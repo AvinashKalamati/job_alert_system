@@ -1,9 +1,11 @@
 """Fetch and normalize jobs from the configured company career systems."""
 
 from concurrent.futures import ThreadPoolExecutor
+import json
 import re
 import threading
 from urllib.parse import parse_qs, urljoin, urlparse
+from xml.etree import ElementTree
 
 from bs4 import BeautifulSoup
 import requests
@@ -46,7 +48,6 @@ BROWSER_HEADERS = {
 
 _DOMAIN_LIMITERS = {}
 _DOMAIN_LIMITERS_LOCK = threading.Lock()
-
 
 def _domain_limiter(url: str) -> threading.BoundedSemaphore:
     """Return the configured semaphore for one outbound hostname."""
@@ -851,6 +852,88 @@ def fetch_seismic_jobs(options: dict) -> list[dict]:
         return _failed("seismic", company, error)
 
 
+def fetch_atlassian_jobs(options: dict) -> list[dict]:
+    """Fetch jobs embedded in Atlassian's public careers page."""
+    company = options.get("company", "Atlassian")
+    page_url = options["url"]
+    try:
+        response = _get(
+            page_url, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT
+        )
+        response.raise_for_status()
+        marker = "window._uniformPreloadedComposition="
+        start = response.text.index(marker) + len(marker)
+        payload, _ = json.JSONDecoder().raw_decode(response.text[start:])
+        normalized = []
+
+        def visit(value):
+            if isinstance(value, dict):
+                fields = value.get("fields")
+                if isinstance(fields, dict) and {
+                    "applyUrl", "id", "title"
+                }.issubset(fields):
+                    normalized.append(
+                        _job(
+                            "atlassian",
+                            company,
+                            fields["id"],
+                            fields["title"],
+                            fields["applyUrl"],
+                            _location(fields.get("locations")),
+                        )
+                    )
+                for item in value.values():
+                    visit(item)
+            elif isinstance(value, list):
+                for item in value:
+                    visit(item)
+
+        visit(payload)
+        return list({posting["id"]: posting for posting in normalized}.values())
+    except (requests.RequestException, ValueError, AttributeError, KeyError) as error:
+        return _failed("atlassian", company, error)
+
+
+def fetch_expedia_jobs(options: dict) -> list[dict]:
+    """Fetch Expedia jobs from its publicly declared XML sitemap."""
+    company = options.get("company", "Expedia")
+    sitemap_url = options["sitemap_url"]
+    try:
+        response = _get(
+            sitemap_url, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT
+        )
+        response.raise_for_status()
+        root = ElementTree.fromstring(response.content)
+        namespace = {"sitemap": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        normalized = []
+        for element in root.findall("sitemap:url", namespace):
+            location = element.findtext("sitemap:loc", namespaces=namespace)
+            if not location:
+                continue
+            path_parts = urlparse(location).path.strip("/").split("/")
+            if len(path_parts) != 4 or path_parts[0] != "job":
+                continue
+            _, title_slug, location_slug, raw_id = path_parts
+            normalized.append(
+                _job(
+                    "expedia",
+                    company,
+                    raw_id,
+                    title_slug.replace("-", " "),
+                    location.replace("http://", "https://", 1),
+                    location_slug.replace("-", " "),
+                )
+            )
+        return normalized
+    except (
+        requests.RequestException,
+        ValueError,
+        AttributeError,
+        ElementTree.ParseError,
+    ) as error:
+        return _failed("expedia", company, error)
+
+
 CONFIGURED_FETCHERS = {
     "greenhouse": fetch_greenhouse_jobs,
     "lever": fetch_lever_jobs,
@@ -867,6 +950,8 @@ CONFIGURED_FETCHERS = {
     "ashby": fetch_ashby_jobs,
     "workday": fetch_workday_jobs,
     "seismic": fetch_seismic_jobs,
+    "atlassian": fetch_atlassian_jobs,
+    "expedia": fetch_expedia_jobs,
 }
 
 

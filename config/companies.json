@@ -4,7 +4,12 @@
     "digitalocean98",
     "life360",
     "seatgeek",
-    "doordashusa"
+    "doordashusa",
+    "databricks",
+    "stripe",
+    "airbnb",
+    "anthropic",
+    "block"
   ],
   "lever": [],
   "amazon": [
@@ -66,6 +71,10 @@
     {
       "company": "Hims & Hers",
       "token": "hims-and-hers"
+    },
+    {
+      "company": "OpenAI",
+      "token": "openai"
     }
   ],
   "workday": [
@@ -124,6 +133,13 @@
       "tenant": "ebay",
       "site": "apply",
       "max_pages": 10
+    },
+    {
+      "company": "Workday",
+      "host": "https://workday.wd5.myworkdayjobs.com",
+      "tenant": "workday",
+      "site": "Workday",
+      "max_pages": 10
     }
   ],
   "ibm": [
@@ -151,6 +167,12 @@
       "host": "https://iaziqy.fa.ocs.oraclecloud.com",
       "site": "UberCareers",
       "max_pages": 10
+    },
+    {
+      "company": "Dell",
+      "host": "https://enterpriseplatform.dell.com",
+      "site": "careers",
+      "max_pages": 5
     }
   ],
   "apple": [
@@ -163,6 +185,18 @@
     {
       "company": "Highspot / Seismic",
       "url": "https://www.seismic.com/careers/job-listings/"
+    }
+  ],
+  "atlassian": [
+    {
+      "company": "Atlassian",
+      "url": "https://www.atlassian.com/company/careers/all-jobs"
+    }
+  ],
+  "expedia": [
+    {
+      "company": "Expedia",
+      "sitemap_url": "https://careers.expediagroup.com/jobs-sitemap.xml"
     }
   ]
 }

@@ -10,7 +10,10 @@ class ConfigTests(unittest.TestCase):
             expected = {row["company"] for row in rows[:20]}
             expected.update(
                 rows[index]["company"]
-                for index in (20, 21, 22, 23, 24, 26, 27, 28, 29)
+                for index in (
+                    20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+                    35, 36, 37, 38, 39,
+                )
             )
 
         with open("config/companies.json") as file:
@@ -28,6 +31,11 @@ class ConfigTests(unittest.TestCase):
             "life360": "Life360",
             "seatgeek": "SeatGeek",
             "doordashusa": "DoorDash",
+            "databricks": "Databricks",
+            "stripe": "Stripe",
+            "airbnb": "Airbnb",
+            "anthropic": "Anthropic",
+            "block": "Block",
         }
         configured.update(
             greenhouse_companies[token]

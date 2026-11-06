@@ -5,9 +5,10 @@ import fetchers
 
 
 class FakeResponse:
-    def __init__(self, json_data=None, text="", headers=None):
+    def __init__(self, json_data=None, text="", headers=None, content=None):
         self._json_data = json_data
         self.text = text
+        self.content = content if content is not None else text.encode()
         self.headers = headers or {}
 
     def raise_for_status(self):
@@ -242,6 +243,38 @@ class FetcherTests(unittest.TestCase):
         jobs = fetchers.fetch_seismic_jobs({"company": "Highspot / Seismic"})
         self.assertEqual(jobs[0]["id"], "seismic_highspot_seismic_2384")
         self.assertEqual(jobs[0]["location"], "Boston, MA")
+
+    @patch("fetchers.requests.get")
+    def test_atlassian_embedded_jobs(self, get):
+        get.return_value = FakeResponse(text="""
+          <script>window._uniformPreloadedComposition={
+            "content": [{"fields": {
+              "id": "123", "title": "Software Engineer",
+              "applyUrl": "https://careers-americas.icims.com/jobs/123",
+              "locations": ["Remote"]
+            }}]};</script>
+        """)
+        jobs = fetchers.fetch_atlassian_jobs({
+            "company": "Atlassian", "url": "https://example.com/jobs"
+        })
+        self.assertEqual(jobs[0]["id"], "atlassian_atlassian_123")
+        self.assertEqual(jobs[0]["location"], "Remote")
+
+    @patch("fetchers.requests.get")
+    def test_expedia_jobs_sitemap(self, get):
+        get.return_value = FakeResponse(text="""<?xml version="1.0"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url><loc>http://careers.expediagroup.com/job/software-development-engineer-ii/seattle-wa/R-123/</loc></url>
+          </urlset>
+        """)
+        jobs = fetchers.fetch_expedia_jobs({
+            "company": "Expedia",
+            "sitemap_url": "https://careers.expediagroup.com/jobs-sitemap.xml",
+        })
+        self.assertEqual(jobs[0]["id"], "expedia_expedia_R-123")
+        self.assertEqual(jobs[0]["title"], "software development engineer ii")
+        self.assertEqual(jobs[0]["location"], "seattle wa")
+        self.assertTrue(jobs[0]["url"].startswith("https://"))
 
 
 if __name__ == "__main__":
