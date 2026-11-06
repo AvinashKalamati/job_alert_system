@@ -33,7 +33,9 @@ def run_job_check() -> str:
     print(f"Fetched {len(all_jobs)} total postings across all companies.")
 
     relevant_jobs = filter_jobs(all_jobs, keywords)
-    print(f"{len(relevant_jobs)} postings match entry-level/new-grad keywords.")
+    print(
+        f"{len(relevant_jobs)} postings match title and US location filters."
+    )
 
     new_jobs = filter_new_jobs(relevant_jobs)
     print(f"{len(new_jobs)} of those are new (not seen before).")

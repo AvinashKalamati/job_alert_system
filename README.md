@@ -8,8 +8,10 @@ texts you when a new match is found.
 
 1. `fetchers.py` pulls current job listings from each configured public
    career feed or careers page and converts them to one common format.
-2. `filters.py` keeps only postings matching new-grad/SDE1/SDE2 style
-   keywords, excluding senior/staff/lead roles.
+2. `filters.py` keeps only postings matching the configured software-engineering
+   title keywords and a recognizable U.S. location, excluding senior/staff/lead
+   roles. U.S. states, abbreviations, and U.S.-qualified remote locations are
+   accepted; plain `Remote` and `Unknown` are excluded.
 3. `dedupe.py` checks Firestore to see which of those postings are new
    (not previously seen).
 4. `mailer.py` emails the full list via Gmail SMTP.
