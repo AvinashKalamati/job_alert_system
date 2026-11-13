@@ -20,10 +20,13 @@ texts you when a new match is found.
 
 ## Configured CSV companies
 
-The first 20 rows of `h1b-102-companies-careers-pages.csv` are configured,
-plus Oracle, PayPal, Adobe, ServiceNow, Uber, Apple, Palo Alto Networks, eBay,
-and DoorDash.
-Highspot's careers page redirects to Seismic.
+Rows 1–60 of `h1b-102-companies-careers-pages.csv` are covered except Meta,
+whose adapter is still pending. Highspot's careers page redirects to Seismic,
+and Juniper Networks roles are now on HPE's combined careers board.
+SAP is moving from its legacy board to a new careers site; the current adapter
+checks the accessible legacy board and may miss roles already migrated.
+Nutanix's public Jobvite board can have fewer listings than its main careers
+page, so its coverage may also be incomplete.
 
 Large boards are scanned newest-first with page limits set in
 `config/companies.json`. This makes a 30-minute alert run practical while still

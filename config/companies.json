@@ -9,7 +9,11 @@
     "stripe",
     "airbnb",
     "anthropic",
-    "block"
+    "block",
+    "coinbase",
+    "robinhood",
+    "pinterest",
+    "roblox"
   ],
   "lever": [],
   "amazon": [
@@ -36,6 +40,19 @@
       "host": "https://paypal.eightfold.ai",
       "domain": "paypal.com",
       "max_pages": 3
+    },
+    {
+      "company": "Micron",
+      "host": "https://careers.micron.com",
+      "domain": "micron.com",
+      "max_pages": 10
+    },
+    {
+      "company": "Netflix",
+      "host": "https://explore.jobs.netflix.net",
+      "domain": "netflix.com",
+      "api_path": "/api/apply/v2/jobs",
+      "max_pages": 10
     }
   ],
   "google_careers": [
@@ -140,6 +157,41 @@
       "tenant": "workday",
       "site": "Workday",
       "max_pages": 10
+    },
+    {
+      "company": "Cadence Design Systems",
+      "host": "https://cadence.wd1.myworkdayjobs.com",
+      "tenant": "cadence",
+      "site": "External_Careers",
+      "max_pages": 10
+    },
+    {
+      "company": "KLA",
+      "host": "https://kla.wd1.myworkdayjobs.com",
+      "tenant": "kla",
+      "site": "UR",
+      "max_pages": 10
+    },
+    {
+      "company": "Hewlett Packard Enterprise",
+      "host": "https://hpe.wd5.myworkdayjobs.com",
+      "tenant": "hpe",
+      "site": "Jobsathpe",
+      "max_pages": 15
+    },
+    {
+      "company": "T-Mobile",
+      "host": "https://tmobile.wd1.myworkdayjobs.com",
+      "tenant": "tmobile",
+      "site": "External",
+      "max_pages": 15
+    },
+    {
+      "company": "Snap",
+      "host": "https://snapchat.wd1.myworkdayjobs.com",
+      "tenant": "snapchat",
+      "site": "snap",
+      "max_pages": 15
     }
   ],
   "ibm": [
@@ -197,6 +249,53 @@
     {
       "company": "Expedia",
       "sitemap_url": "https://careers.expediagroup.com/jobs-sitemap.xml"
+    }
+  ],
+  "amd": [
+    {
+      "company": "AMD",
+      "max_pages": 10
+    }
+  ],
+  "talentbrew": [
+    {
+      "company": "Comcast / NBCUniversal",
+      "url": "https://jobs.comcast.com/search-jobs",
+      "max_pages": 10
+    },
+    {
+      "company": "Intuit",
+      "url": "https://jobs.intuit.com/search-jobs",
+      "max_pages": 10
+    },
+    {
+      "company": "Applied Materials",
+      "url": "https://jobs.appliedmaterials.com/search-jobs",
+      "max_pages": 10
+    },
+    {
+      "company": "Synopsys",
+      "url": "https://careers.synopsys.com/search-jobs",
+      "max_pages": 10
+    }
+  ],
+  "linkedin": [
+    {
+      "company": "LinkedIn",
+      "company_id": 1337,
+      "max_pages": 5
+    }
+  ],
+  "sap": [
+    {
+      "company": "SAP America",
+      "max_pages": 10
+    }
+  ],
+  "jobvite": [
+    {
+      "company": "Nutanix",
+      "url": "https://jobs.jobvite.com/nutanix/jobs"
     }
   ]
 }

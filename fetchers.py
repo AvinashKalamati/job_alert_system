@@ -20,7 +20,7 @@ from proxy_support import (
 GREENHOUSE_URL = "https://boards-api.greenhouse.io/v1/boards/{token}/jobs"
 LEVER_URL = "https://api.lever.co/v0/postings/{token}?mode=json"
 AMAZON_URL = "https://www.amazon.jobs/en/search.json"
-EIGHTFOLD_URL = "{host}/api/pcsx/search"
+AMD_URL = "https://careers.amd.com/api/jobs"
 GOOGLE_URL = "https://www.google.com/about/careers/applications/jobs/results/"
 BYTEDANCE_URL = "https://jobs.bytedance.com/api/v1/public/supplier/search/job/posts"
 TESLA_URL = "https://www.tesla.com/cua-api/apps/careers/state"
@@ -220,7 +220,7 @@ def fetch_eightfold_jobs(options: dict) -> list[dict]:
     try:
         for page in range(int(options.get("max_pages", 20))):
             response = _get(
-                EIGHTFOLD_URL.format(host=host),
+                f"{host}{options.get('api_path', '/api/pcsx/search')}",
                 params={
                     "domain": options.get("domain", ""),
                     "start": page * page_size,
@@ -270,6 +270,43 @@ def fetch_eightfold_jobs(options: dict) -> list[dict]:
         TypeError,
     ) as error:
         return _failed("eightfold", company, error)
+    return normalized
+
+
+def fetch_amd_jobs(options: dict) -> list[dict]:
+    """Fetch AMD's public Jibe job feed."""
+    company = options["company"]
+    page_size = 100
+    normalized = []
+    try:
+        for page in range(int(options.get("max_pages", 10))):
+            response = _get(
+                AMD_URL,
+                params={"limit": page_size, "offset": page * page_size},
+                headers=BROWSER_HEADERS,
+                timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            body = response.json()
+            jobs = body.get("jobs", [])
+            for item in jobs:
+                posting = item.get("data") or {}
+                raw_id = posting.get("req_id") or posting.get("slug")
+                if not raw_id:
+                    continue
+                normalized.append(
+                    _job(
+                        "amd", company, raw_id, posting.get("title"),
+                        f"https://careers.amd.com/careers-home/jobs/{posting.get('slug') or raw_id}",
+                        ", ".join(str(posting[key]).strip() for key in
+                                  ("city", "state", "country") if posting.get(key)),
+                    )
+                )
+            total = body.get("totalCount")
+            if len(jobs) < page_size or (total is not None and len(normalized) >= int(total)):
+                break
+    except (requests.RequestException, ValueError, AttributeError, TypeError) as error:
+        return _failed("amd", company, error)
     return normalized
 
 
@@ -780,6 +817,11 @@ def fetch_workday_jobs(options: dict) -> list[dict]:
                     if bullet_fields
                     else external_path.rstrip("/").split("/")[-1]
                 )
+                place = posting.get("locationsText") or posting.get("location")
+                if isinstance(place, str) and re.fullmatch(r"\d+ Locations?", place):
+                    path_parts = external_path.strip("/").split("/")
+                    if len(path_parts) > 2:
+                        place = path_parts[1].replace("-", " ")
                 normalized.append(
                     _job(
                         "workday",
@@ -790,10 +832,7 @@ def fetch_workday_jobs(options: dict) -> list[dict]:
                             f"{host}/{site}/",
                             external_path.lstrip("/"),
                         ),
-                        _location(
-                            posting.get("locationsText")
-                            or posting.get("location")
-                        ),
+                        _location(place),
                     )
                 )
             total = body.get("total")
@@ -934,11 +973,152 @@ def fetch_expedia_jobs(options: dict) -> list[dict]:
         return _failed("expedia", company, error)
 
 
+def fetch_talentbrew_jobs(options: dict) -> list[dict]:
+    """Read the public, paginated Radancy/TalentBrew search results."""
+    company = options["company"]
+    base_url = options["url"]
+    normalized = {}
+    try:
+        for page in range(1, int(options.get("max_pages", 10)) + 1):
+            response = _get(
+                base_url, params={"p": page}, headers=BROWSER_HEADERS,
+                timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            links = soup.select('a[data-job-id][href*="/job/"]')
+            added = 0
+            for link in links:
+                raw_id = link.get("data-job-id")
+                title = link.select_one("h2")
+                card = link.find_parent("li")
+                place = card.select_one(".job-location") if card else None
+                if not raw_id or raw_id in normalized:
+                    continue
+                normalized[raw_id] = _job(
+                    "talentbrew", company, raw_id,
+                    title.get_text(" ", strip=True) if title else link.get_text(" ", strip=True),
+                    urljoin(base_url, link.get("href", "")),
+                    place.get_text(" ", strip=True) if place else "Unknown",
+                )
+                added += 1
+            if not links or not added:
+                break
+            current = soup.select_one("input.pagination-current")
+            if current and current.get("max") and page >= int(current["max"]):
+                break
+    except (requests.RequestException, ValueError, AttributeError, TypeError) as error:
+        return _failed("talentbrew", company, error)
+    return list(normalized.values())
+
+
+def fetch_linkedin_jobs(options: dict) -> list[dict]:
+    """Read LinkedIn's own postings from its public guest search."""
+    company = options["company"]
+    base_url = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+    normalized = {}
+    try:
+        for page in range(int(options.get("max_pages", 5))):
+            response = _get(
+                base_url,
+                params={"f_C": options["company_id"], "start": page * 10},
+                headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            cards = soup.select("li .base-search-card")
+            if not cards:
+                break
+            for card in cards:
+                urn = card.get("data-entity-urn", "")
+                raw_id = urn.rsplit(":", 1)[-1]
+                title = card.select_one(".base-search-card__title")
+                link = card.select_one("a.base-card__full-link")
+                place = card.select_one(".job-search-card__location")
+                if not raw_id.isdigit() or not title or not link:
+                    continue
+                posting_url = urlparse(link.get("href", ""))
+                normalized[raw_id] = _job(
+                    "linkedin", company, raw_id, title.get_text(" ", strip=True),
+                    posting_url._replace(query="", fragment="").geturl(),
+                    place.get_text(" ", strip=True) if place else "Unknown",
+                )
+            if len(cards) < 10:
+                break
+    except (requests.RequestException, ValueError, AttributeError) as error:
+        return _failed("linkedin", company, error)
+    return list(normalized.values())
+
+
+def fetch_sap_jobs(options: dict) -> list[dict]:
+    """Read SAP's still-active legacy jobs board during its site migration."""
+    company = options["company"]
+    base_url = "https://careers.sap.com/search/"
+    normalized = {}
+    try:
+        for page in range(int(options.get("max_pages", 10))):
+            response = _get(
+                base_url,
+                params={"q": "", "sortColumn": "referencedate",
+                        "sortDirection": "desc", "startrow": page * 25},
+                headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            rows = soup.select("tr.data-row")
+            if not rows:
+                break
+            for row in rows:
+                link = row.select_one(".jobTitle.hidden-phone a.jobTitle-link")
+                if not link:
+                    continue
+                posting_url = urljoin(base_url, link.get("href", ""))
+                raw_id = urlparse(posting_url).path.strip("/").split("/")[-1]
+                place = row.select_one("td.colLocation .jobLocation")
+                normalized[raw_id] = _job(
+                    "sap", company, raw_id, link.get_text(" ", strip=True),
+                    posting_url,
+                    place.get_text(" ", strip=True) if place else "Unknown",
+                )
+            if len(rows) < 25:
+                break
+    except (requests.RequestException, ValueError, AttributeError) as error:
+        return _failed("sap", company, error)
+    return list(normalized.values())
+
+
+def fetch_jobvite_jobs(options: dict) -> list[dict]:
+    """Read the public Jobvite board used for Nutanix applications."""
+    company = options["company"]
+    base_url = options["url"]
+    try:
+        response = _get(base_url, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+        normalized = {}
+        for row in soup.select("table.jv-job-list tbody tr"):
+            link = row.select_one("td.jv-job-list-name a[href]")
+            place = row.select_one("td.jv-job-list-location")
+            if not link:
+                continue
+            posting_url = urljoin(base_url, link["href"])
+            raw_id = urlparse(posting_url).path.rstrip("/").split("/")[-1]
+            normalized[raw_id] = _job(
+                "jobvite", company, raw_id, link.get_text(" ", strip=True),
+                posting_url,
+                place.get_text(" ", strip=True) if place else "Unknown",
+            )
+        return list(normalized.values())
+    except (requests.RequestException, ValueError, AttributeError) as error:
+        return _failed("jobvite", company, error)
+
+
 CONFIGURED_FETCHERS = {
     "greenhouse": fetch_greenhouse_jobs,
     "lever": fetch_lever_jobs,
     "amazon": fetch_amazon_jobs,
     "eightfold": fetch_eightfold_jobs,
+    "amd": fetch_amd_jobs,
     "google_careers": fetch_google_jobs,
     "ibm": fetch_ibm_jobs,
     "smartrecruiters": fetch_smartrecruiters_jobs,
@@ -952,6 +1132,10 @@ CONFIGURED_FETCHERS = {
     "seismic": fetch_seismic_jobs,
     "atlassian": fetch_atlassian_jobs,
     "expedia": fetch_expedia_jobs,
+    "talentbrew": fetch_talentbrew_jobs,
+    "linkedin": fetch_linkedin_jobs,
+    "sap": fetch_sap_jobs,
+    "jobvite": fetch_jobvite_jobs,
 }
 
 

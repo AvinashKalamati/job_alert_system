@@ -4,16 +4,13 @@ import unittest
 
 
 class ConfigTests(unittest.TestCase):
-    def test_config_contains_the_first_twenty_and_verified_next_companies(self):
+    def test_config_contains_companies_through_sixty_except_meta(self):
         with open("h1b-102-companies-careers-pages.csv", newline="") as file:
             rows = list(csv.DictReader(file))
             expected = {row["company"] for row in rows[:20]}
             expected.update(
-                rows[index]["company"]
-                for index in (
-                    20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34,
-                    35, 36, 37, 38, 39,
-                )
+                row["company"] for index, row in enumerate(rows[:60])
+                if index != 25
             )
 
         with open("config/companies.json") as file:
@@ -36,6 +33,10 @@ class ConfigTests(unittest.TestCase):
             "airbnb": "Airbnb",
             "anthropic": "Anthropic",
             "block": "Block",
+            "coinbase": "Coinbase",
+            "robinhood": "Robinhood",
+            "pinterest": "Pinterest",
+            "roblox": "Roblox",
         }
         configured.update(
             greenhouse_companies[token]
@@ -46,6 +47,8 @@ class ConfigTests(unittest.TestCase):
         # Highspot's own page redirects to the consolidated Seismic board.
         configured.discard("Highspot / Seismic")
         configured.add("Highspot")
+        # Juniper's career search now feeds into HPE's combined board.
+        configured.add("Juniper Networks")
         self.assertEqual(configured, expected)
 
 
