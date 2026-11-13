@@ -13,9 +13,13 @@
     "coinbase",
     "robinhood",
     "pinterest",
-    "roblox"
+    "roblox",
+    "purestorage",
+    "instacart",
+    "zscaler",
+    "mongodb"
   ],
-  "lever": [],
+  "lever": ["spotify"],
   "amazon": [
     {
       "company": "Amazon",
@@ -52,6 +56,30 @@
       "host": "https://explore.jobs.netflix.net",
       "domain": "netflix.com",
       "api_path": "/api/apply/v2/jobs",
+      "max_pages": 10
+    },
+    {
+      "company": "Autodesk",
+      "host": "https://jobs.autodesk.com",
+      "domain": "autodesk.com",
+      "max_pages": 10
+    },
+    {
+      "company": "Lam Research",
+      "host": "https://careers.lamresearch.com",
+      "domain": "lamresearch.com",
+      "max_pages": 10
+    },
+    {
+      "company": "HP Inc.",
+      "host": "https://apply.hp.com",
+      "domain": "hp.com",
+      "max_pages": 10
+    },
+    {
+      "company": "Twilio",
+      "host": "https://jobs.twilio.com",
+      "domain": "twilio.com",
       "max_pages": 10
     }
   ],
@@ -192,6 +220,49 @@
       "tenant": "snapchat",
       "site": "snap",
       "max_pages": 15
+    },
+    {
+      "company": "Marvell",
+      "host": "https://marvell.wd1.myworkdayjobs.com",
+      "tenant": "marvell",
+      "site": "MarvellCareers",
+      "max_pages": 15
+    },
+    {
+      "company": "NXP Semiconductors",
+      "host": "https://nxp.myworkdayjobs.com",
+      "tenant": "nxp",
+      "site": "careers",
+      "max_pages": 45
+    },
+    {
+      "company": "Motorola Solutions",
+      "host": "https://motorolasolutions.wd5.myworkdayjobs.com",
+      "tenant": "motorolasolutions",
+      "site": "Careers",
+      "max_pages": 45
+    },
+    {
+      "company": "Samsung Electronics America",
+      "host": "https://sec.wd3.myworkdayjobs.com",
+      "tenant": "sec",
+      "site": "Samsung_Careers",
+      "max_pages": 35
+    },
+    {
+      "company": "F5",
+      "host": "https://ffive.wd5.myworkdayjobs.com",
+      "tenant": "ffive",
+      "site": "f5jobs",
+      "max_pages": 15
+    },
+    {
+      "company": "VMware",
+      "host": "https://broadcom.wd1.myworkdayjobs.com",
+      "tenant": "broadcom",
+      "site": "External_Career",
+      "search_text": "VMware",
+      "max_pages": 5
     }
   ],
   "ibm": [
@@ -205,6 +276,11 @@
       "company": "ServiceNow",
       "identifier": "ServiceNow",
       "max_pages": 10
+    },
+    {
+      "company": "Arista Networks",
+      "identifier": "AristaNetworks",
+      "max_pages": 5
     }
   ],
   "oracle_recruiting": [
@@ -225,6 +301,24 @@
       "host": "https://enterpriseplatform.dell.com",
       "site": "careers",
       "max_pages": 5
+    },
+    {
+      "company": "Akamai",
+      "host": "https://fa-extu-saasfaprod1.fa.ocs.oraclecloud.com",
+      "site": "CX_1",
+      "max_pages": 5
+    },
+    {
+      "company": "Fortinet",
+      "host": "https://edel.fa.us2.oraclecloud.com",
+      "site": "CX_2001",
+      "max_pages": 15
+    },
+    {
+      "company": "Texas Instruments",
+      "host": "https://edbz.fa.us2.oraclecloud.com",
+      "site": "CX",
+      "max_pages": 10
     }
   ],
   "apple": [
@@ -277,6 +371,11 @@
       "company": "Synopsys",
       "url": "https://careers.synopsys.com/search-jobs",
       "max_pages": 10
+    },
+    {
+      "company": "NetApp",
+      "url": "https://careers.netapp.com/search-jobs",
+      "max_pages": 20
     }
   ],
   "linkedin": [

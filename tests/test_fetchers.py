@@ -257,6 +257,25 @@ class FetcherTests(unittest.TestCase):
         self.assertEqual(jobs[0]["id"], "workday_zillow_P123")
         self.assertIn("/Zillow_Group_External/job/", jobs[0]["url"])
 
+    @patch("fetchers.requests.post")
+    def test_vmware_workday_searches_broadcom_board(self, post):
+        post.return_value = FakeResponse({"total": 1, "jobPostings": [{
+            "title": "VMware Engineer",
+            "externalPath": "/job/Remote/VMware-Engineer_R123",
+            "locationsText": "Remote",
+            "bulletFields": ["R123"],
+        }]})
+        jobs = fetchers.fetch_workday_jobs({
+            "company": "VMware",
+            "host": "https://broadcom.wd1.myworkdayjobs.com",
+            "tenant": "broadcom",
+            "site": "External_Career",
+            "search_text": "VMware",
+            "max_pages": 1,
+        })
+        self.assertEqual(post.call_args.kwargs["json"]["searchText"], "VMware")
+        self.assertEqual(jobs[0]["company"], "VMware")
+
     @patch("fetchers.requests.get")
     def test_highspot_seismic(self, get):
         get.return_value = FakeResponse(text="""
@@ -317,6 +336,20 @@ class FetcherTests(unittest.TestCase):
         })
         self.assertEqual(jobs[0]["id"], "talentbrew_comcast_nbcuniversal_123")
         self.assertEqual(jobs[0]["location"], "Seattle, WA")
+
+    @patch("fetchers.requests.get")
+    def test_netapp_talentbrew_h3_title_excludes_location(self, get):
+        get.return_value = FakeResponse(text="""
+          <ul><li><a href="/job/example/456" data-job-id="456">
+            <h3>Software Engineer</h3>
+            <span class="job-location">San Jose, CA</span>
+          </a></li></ul>
+        """)
+        jobs = fetchers.fetch_talentbrew_jobs({
+            "company": "NetApp", "url": "https://careers.netapp.com/search-jobs",
+            "max_pages": 1,
+        })
+        self.assertEqual(jobs[0]["title"], "Software Engineer")
 
     @patch("fetchers.requests.post")
     def test_snap_workday_multiple_locations_uses_path(self, post):

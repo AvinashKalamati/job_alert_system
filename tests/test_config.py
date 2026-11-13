@@ -4,12 +4,12 @@ import unittest
 
 
 class ConfigTests(unittest.TestCase):
-    def test_config_contains_companies_through_sixty_except_meta(self):
+    def test_config_contains_companies_through_eighty_except_meta(self):
         with open("h1b-102-companies-careers-pages.csv", newline="") as file:
             rows = list(csv.DictReader(file))
             expected = {row["company"] for row in rows[:20]}
             expected.update(
-                row["company"] for index, row in enumerate(rows[:60])
+                row["company"] for index, row in enumerate(rows[:80])
                 if index != 25
             )
 
@@ -37,12 +37,19 @@ class ConfigTests(unittest.TestCase):
             "robinhood": "Robinhood",
             "pinterest": "Pinterest",
             "roblox": "Roblox",
+            "purestorage": "Pure Storage",
+            "instacart": "Instacart",
+            "zscaler": "Zscaler",
+            "mongodb": "MongoDB",
         }
         configured.update(
             greenhouse_companies[token]
             for token in config.get("greenhouse", [])
         )
-        configured.update(token.title() for token in config.get("lever", []))
+        configured.update(
+            "Spotify USA" if token == "spotify" else token.title()
+            for token in config.get("lever", [])
+        )
 
         # Highspot's own page redirects to the consolidated Seismic board.
         configured.discard("Highspot / Seismic")

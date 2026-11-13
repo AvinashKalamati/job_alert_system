@@ -801,7 +801,7 @@ def fetch_workday_jobs(options: dict) -> list[dict]:
                     "appliedFacets": {},
                     "limit": page_size,
                     "offset": page * page_size,
-                    "searchText": "",
+                    "searchText": options.get("search_text", ""),
                 },
                 headers={**BROWSER_HEADERS, "Content-Type": "application/json"},
                 timeout=REQUEST_TIMEOUT,
@@ -990,7 +990,7 @@ def fetch_talentbrew_jobs(options: dict) -> list[dict]:
             added = 0
             for link in links:
                 raw_id = link.get("data-job-id")
-                title = link.select_one("h2")
+                title = link.select_one("h2, h3")
                 card = link.find_parent("li")
                 place = card.select_one(".job-location") if card else None
                 if not raw_id or raw_id in normalized:
