@@ -54,6 +54,9 @@ def is_us_location(location: str) -> bool:
         return False
 
     location_lower = location.lower()
+    # Shopify uses this region for roles open to US applicants.
+    if location_lower.strip() == "remote - americas":
+        return True
     if re.search(
         r"(?<![a-z])(?:united states(?: of america)?|u\.s\.a\.?|u\.s\.)(?![a-z])",
         location_lower,

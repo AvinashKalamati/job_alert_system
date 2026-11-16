@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import patch
 
@@ -276,6 +277,22 @@ class FetcherTests(unittest.TestCase):
         self.assertEqual(post.call_args.kwargs["json"]["searchText"], "VMware")
         self.assertEqual(jobs[0]["company"], "VMware")
 
+    @patch("fetchers.time.sleep")
+    @patch("fetchers.requests.post")
+    def test_workday_retries_rate_limit(self, post, sleep):
+        limited = FakeResponse()
+        limited.status_code = 429
+        success = FakeResponse({"total": 0, "jobPostings": []})
+        success.status_code = 200
+        post.side_effect = [limited, success]
+        fetchers.fetch_workday_jobs({
+            "company": "Broadcom",
+            "host": "https://broadcom.wd1.myworkdayjobs.com",
+            "tenant": "broadcom", "site": "External_Career", "max_pages": 1,
+        })
+        self.assertEqual(post.call_count, 2)
+        sleep.assert_called_once_with(0.5)
+
     @patch("fetchers.requests.get")
     def test_highspot_seismic(self, get):
         get.return_value = FakeResponse(text="""
@@ -404,6 +421,66 @@ class FetcherTests(unittest.TestCase):
             "company": "Nutanix", "url": "https://jobs.jobvite.com/nutanix/jobs",
         })
         self.assertEqual(jobs[0]["id"], "jobvite_nutanix_o123")
+
+    @patch("fetchers.requests.get")
+    def test_ea_results_extract_location_and_id(self, get):
+        get.return_value = FakeResponse(text="""
+          <div class="article__header__text">
+            <a class="link_result" href="https://jobs.ea.com/en_US/careers/JobDetail/Engineer/123">Engineer</a>
+            <span class="list-item-location">Los Angeles, CA</span>
+          </div>
+        """)
+        jobs = fetchers.fetch_ea_jobs({"company": "Electronic Arts", "max_pages": 1})
+        self.assertEqual(jobs[0]["id"], "ea_electronic_arts_123")
+        self.assertEqual(jobs[0]["location"], "Los Angeles, CA")
+
+    @patch("fetchers.requests.get")
+    def test_shopify_embedded_posting(self, get):
+        get.return_value = FakeResponse(text="""
+          <a href="/careers/software-engineer_abc" data-component-extra-job-posting-id="abc">
+            <h3>Software Engineer</h3><p id="role-location">Remote - Americas</p>
+          </a>
+        """)
+        jobs = fetchers.fetch_shopify_jobs({"company": "Shopify"})
+        self.assertEqual(jobs[0]["id"], "shopify_shopify_abc")
+        self.assertEqual(jobs[0]["location"], "Remote - Americas")
+        self.assertEqual(get.call_args.args[0], "https://www.shopify.com/careers/jobs")
+
+    @patch("fetchers.requests.get")
+    def test_zoom_feed_uses_public_job_page(self, get):
+        get.return_value = FakeResponse([{ "data": {
+            "referenceNumber": "R1", "jobName": "Software Engineer",
+            "fullAddress": "San Jose, United States of America",
+            "jobURL": "https://careers.zoom.us/job-details/software-engineer",
+            "activeStatus": True,
+        }}])
+        jobs = fetchers.fetch_zoom_jobs({"company": "Zoom"})
+        self.assertEqual(jobs[0]["id"], "zoom_zoom_R1")
+        self.assertIn("www.careers.zoom.us", jobs[0]["url"])
+
+    @patch("fetchers.requests.get")
+    def test_disney_embedded_search_results(self, get):
+        payload = {"eagerLoadRefineSearch": {"totalHits": 1, "data": {
+            "jobs": [{"jobId": "123", "title": "Engineer",
+                      "location": "Burbank, California, United States"}],
+        }}}
+        get.return_value = FakeResponse(
+            text=f"<script>phApp.ddo = {json.dumps(payload)};</script>"
+        )
+        jobs = fetchers.fetch_disney_jobs({"company": "Disney", "max_pages": 1})
+        self.assertEqual(jobs[0]["id"], "disney_disney_123")
+        self.assertEqual(jobs[0]["location"], "Burbank, California, United States")
+
+    @patch("fetchers.requests.post")
+    def test_confluent_ibm_search_uses_keyword(self, post):
+        post.return_value = FakeResponse({"hits": {"total": {"value": 1}, "hits": [{
+            "_id": "abc", "_source": {"title": "Engineer - Confluent",
+            "url": "https://careers.ibm.com/careers/JobDetail?jobId=123",
+            "field_keyword_19": "San Jose, CA"},
+        }]}})
+        jobs = fetchers.fetch_ibm_jobs({"company": "Confluent", "search_text": "Confluent", "max_pages": 1})
+        self.assertEqual(post.call_args.kwargs["json"]["sm"]["query"], "Confluent")
+        self.assertEqual(jobs[0]["company"], "Confluent")
 
 
 if __name__ == "__main__":

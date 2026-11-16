@@ -30,6 +30,7 @@ class FilterTests(unittest.TestCase):
             "US, CA, San Francisco",
             "Remote - US",
             "Remote, United States",
+            "Remote - Americas",
         )
         for location in locations:
             with self.subTest(location=location):

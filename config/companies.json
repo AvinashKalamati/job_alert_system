@@ -17,7 +17,19 @@
     "purestorage",
     "instacart",
     "zscaler",
-    "mongodb"
+    "mongodb",
+    "sonyinteractiveentertainmentglobal",
+    "rubrik",
+    "lyft",
+    "dropbox",
+    "godaddy",
+    "cloudflare",
+    "okta",
+    "reddit",
+    "samsara",
+    "duolingo",
+    "affirm",
+    "hubspotjobs"
   ],
   "lever": ["spotify"],
   "amazon": [
@@ -263,12 +275,45 @@
       "site": "External_Career",
       "search_text": "VMware",
       "max_pages": 5
+    },
+    {
+      "company": "CrowdStrike",
+      "host": "https://crowdstrike.wd5.myworkdayjobs.com",
+      "tenant": "crowdstrike",
+      "site": "crowdstrikecareers",
+      "max_pages": 20
+    },
+    {
+      "company": "Broadcom",
+      "host": "https://broadcom.wd1.myworkdayjobs.com",
+      "tenant": "broadcom",
+      "site": "External_Career",
+      "max_pages": 10
+    },
+    {
+      "company": "Cohesity",
+      "host": "https://cohesity.wd5.myworkdayjobs.com",
+      "tenant": "cohesity",
+      "site": "Cohesity_Careers",
+      "max_pages": 15
+    },
+    {
+      "company": "Unity",
+      "host": "https://unitytech.wd1.myworkdayjobs.com",
+      "tenant": "unitytech",
+      "site": "Unity",
+      "max_pages": 15
     }
   ],
   "ibm": [
     {
       "company": "IBM",
       "max_pages": 5
+    },
+    {
+      "company": "Confluent",
+      "search_text": "Confluent",
+      "max_pages": 2
     }
   ],
   "smartrecruiters": [
@@ -280,6 +325,11 @@
     {
       "company": "Arista Networks",
       "identifier": "AristaNetworks",
+      "max_pages": 5
+    },
+    {
+      "company": "Western Digital",
+      "identifier": "WesternDigital",
       "max_pages": 5
     }
   ],
@@ -395,6 +445,28 @@
     {
       "company": "Nutanix",
       "url": "https://jobs.jobvite.com/nutanix/jobs"
+    }
+  ],
+  "ea": [
+    {
+      "company": "Electronic Arts",
+      "max_pages": 20
+    }
+  ],
+  "shopify": [
+    {
+      "company": "Shopify"
+    }
+  ],
+  "zoom": [
+    {
+      "company": "Zoom"
+    }
+  ],
+  "disney": [
+    {
+      "company": "Disney",
+      "max_pages": 50
     }
   ]
 }

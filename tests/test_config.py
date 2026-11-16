@@ -4,12 +4,12 @@ import unittest
 
 
 class ConfigTests(unittest.TestCase):
-    def test_config_contains_companies_through_eighty_except_meta(self):
+    def test_config_contains_all_companies_except_meta(self):
         with open("h1b-102-companies-careers-pages.csv", newline="") as file:
             rows = list(csv.DictReader(file))
             expected = {row["company"] for row in rows[:20]}
             expected.update(
-                row["company"] for index, row in enumerate(rows[:80])
+                row["company"] for index, row in enumerate(rows)
                 if index != 25
             )
 
@@ -41,6 +41,18 @@ class ConfigTests(unittest.TestCase):
             "instacart": "Instacart",
             "zscaler": "Zscaler",
             "mongodb": "MongoDB",
+            "sonyinteractiveentertainmentglobal": "Sony Interactive Entertainment",
+            "rubrik": "Rubrik",
+            "lyft": "Lyft",
+            "dropbox": "Dropbox",
+            "godaddy": "GoDaddy",
+            "cloudflare": "Cloudflare",
+            "okta": "Okta",
+            "reddit": "Reddit",
+            "samsara": "Samsara",
+            "duolingo": "Duolingo",
+            "affirm": "Affirm",
+            "hubspotjobs": "HubSpot",
         }
         configured.update(
             greenhouse_companies[token]
